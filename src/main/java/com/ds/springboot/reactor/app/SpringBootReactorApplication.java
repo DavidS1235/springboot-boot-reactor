@@ -6,6 +6,8 @@ import com.ds.springboot.reactor.app.models.UsuarioComentario;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -37,8 +39,50 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		//ejemploInterval();
 		//ejemploDelayElements();
 		//ejemploIntervaloInfinito();
-		ejemploIntervaloDesdeCreate();
+		//ejemploIntervaloDesdeCreate();
+		ejemploContraPresion();
 	}
+
+
+	//Manejando la contrapresion
+	public void ejemploContraPresion(){
+		Flux.range(1, 10)
+				.log()
+				.limitRate(2)
+				.subscribe(/*new Subscriber<Integer>() {
+					private Subscription s;
+
+					private Integer limite = 5;
+					private Integer consumido = 0;
+
+					@Override
+					public void onSubscribe(Subscription s) {
+						this.s = s;
+						s.request(limite);
+					}
+
+					@Override
+					public void onNext(Integer integer) {
+						log.info(toString());
+						consumido++;
+						if(consumido == limite){
+							consumido = 0;
+							s.request(limite);
+						}
+					}
+
+					@Override
+					public void onError(Throwable t) {
+
+					}
+
+					@Override
+					public void onComplete() {
+
+					}
+				}*/);
+	}
+
 
 	public void ejemploIntervaloDesdeCreate(){
 		Flux.create(emitter -> {
