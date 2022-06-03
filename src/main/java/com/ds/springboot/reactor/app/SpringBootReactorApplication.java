@@ -3,6 +3,7 @@ package com.ds.springboot.reactor.app;
 import com.ds.springboot.reactor.app.models.Comentarios;
 import com.ds.springboot.reactor.app.models.Usuario;
 import com.ds.springboot.reactor.app.models.UsuarioComentario;
+import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -34,8 +35,28 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		//ejemploUsuarioComentariosFlatMap();
 		//ejemploUsuarioComentariosZipWith();
 		//ejemploUsuarioComentariosZipWithForma2();
-		ejemploZipWithRango();
+		//ejemploZipWithRango();
+		//ejemploInterval();
+		ejemploDelayElements();
 
+	}
+
+	public void ejemploDelayElements() throws InterruptedException {
+		Flux<Integer> rango = Flux.range(1, 12)
+				.delayElements(Duration.ofSeconds(1))
+				.doOnNext(i -> log.info(i.toString()));
+
+		rango.blockLast(); // no es recomendable pues puede generar cuellos de botella
+		//Thread.sleep(13000);
+	}
+
+	public void ejemploInterval(){
+		Flux<Integer> rango = Flux.range(1, 12);
+		Flux<Long> retraso = Flux.interval(Duration.ofSeconds(1));
+
+		rango.zipWith(retraso, (ra, re) -> ra)
+				.doOnNext(i -> log.info(i.toString()))
+				.blockLast(); // bloquea el ultimo elemento para poder visualizarlo
 	}
 
 	//Operador range
