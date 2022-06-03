@@ -4,6 +4,7 @@ import com.ds.springboot.reactor.app.models.Comentarios;
 import com.ds.springboot.reactor.app.models.Usuario;
 import com.ds.springboot.reactor.app.models.UsuarioComentario;
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -37,8 +38,28 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		//ejemploUsuarioComentariosZipWithForma2();
 		//ejemploZipWithRango();
 		//ejemploInterval();
-		ejemploDelayElements();
+		//ejemploDelayElements();
+		ejemploIntervaloInfinito();
+	}
 
+	public void ejemploIntervaloInfinito() throws InterruptedException {
+
+		CountDownLatch latch = new CountDownLatch(1);
+
+		Flux.interval(Duration.ofSeconds(1))
+				//.doOnTerminate(() -> latch.countDown()) alternativa
+				.doOnTerminate(latch::countDown)
+				.flatMap(i -> {
+					if(i >=5){
+						return Flux.error(new InterruptedException("Solo hasta 5!"));
+					}
+					return Flux.just(i);
+				})
+				.map(i -> "Hola "+ i)
+				.retry(2)
+				.subscribe(s -> log.info(s), e -> log.error(e.getMessage()));
+
+		latch.await();
 	}
 
 	public void ejemploDelayElements() throws InterruptedException {
