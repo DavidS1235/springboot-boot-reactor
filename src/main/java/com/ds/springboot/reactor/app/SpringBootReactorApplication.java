@@ -4,6 +4,7 @@ import com.ds.springboot.reactor.app.models.Comentarios;
 import com.ds.springboot.reactor.app.models.Usuario;
 import com.ds.springboot.reactor.app.models.UsuarioComentario;
 import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +13,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 @SpringBootApplication
 public class SpringBootReactorApplication implements CommandLineRunner {
@@ -39,8 +36,39 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		//ejemploZipWithRango();
 		//ejemploInterval();
 		//ejemploDelayElements();
-		ejemploIntervaloInfinito();
+		//ejemploIntervaloInfinito();
+		ejemploIntervaloDesdeCreate();
 	}
+
+	public void ejemploIntervaloDesdeCreate(){
+		Flux.create(emitter -> {
+			Timer timer = new Timer();
+			timer.schedule(new TimerTask() {
+
+				private Integer contador=0;
+
+				@Override
+				public void run() {
+					emitter.next(++contador);
+					if(contador == 10){
+						timer.cancel();
+						emitter.complete();
+					}
+					if(contador == 5) {
+						timer.cancel();
+					emitter.error(new InterruptedException("Error, se ha detenido el Flux en 5"));
+					}
+				}
+			}, 1000, 1000);
+		})
+
+				.subscribe(next -> log.info(next.toString()),
+						error -> log.error(error. getMessage()),
+						() -> log.info("Hemos terminado"));
+	}
+
+
+
 
 	public void ejemploIntervaloInfinito() throws InterruptedException {
 
